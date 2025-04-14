@@ -1,80 +1,44 @@
 import ctypes
 
-class Array :
-    def __init__(self, size):
-        assert size > 0, "Array size must be > 0"
-        self._size = size
-        PyArrayType = ctypes.py_object * size
-        self._elements = PyArrayType()
-        self.clear(None)
-
-    def __len__( self ):
-        return self._size
-
-    def __getitem__( self, index ):
-        assert index >= 0 and index < len(self), "Array subscript out of range"
-        return self._elements[ index ]
-
-    def __setitem__( self, index, value ):
-        assert index >= 0 and index < len(self), "Array subscript out of range"
-        self._elements[ index ] = value
-
-    def clear( self, value ):
-        for i in range( len(self) ) :
-            self._elements[i] = value
-
-    def __iter__( self ):
-        return _ArrayIterator( self._elements )
-
-class _ArrayIterator :
-    def __init__( self, the_array ):
-        self._array_ref = the_array
-        self._cur_index = 0
-
-    def __iter__( self ):
-        return self
-
-    def __next__( self ):
-        if self._cur_index < len( self._array_ref ) :
-            entry = self._array_ref[ self._cur_index ]
-            self._cur_index += 1
-            return entry
-        else:
-            raise StopIteration
+class Node(object):
+    def __init__(self, data, next=None):
+        self.data = data
+        self.next = next
 
 class Stack:
-    def __init__(self, capacity):
-        self._data = Array(capacity)
-        self._capacity = capacity
-        self._top = -1
+    def __init__(self):
+        self.topNode = None
+        self.count = 0
 
-    def push(self, value):
-        assert self._top + 1 < self._capacity, "Stack overflow"
-        self._top += 1
-        self._data[self._top] = value
+    def push(self, x):
+        new_node = Node(x)
+        new_node.next = self.topNode
+        self.topNode = new_node
+        self.count += 1
 
     def pop(self):
-        assert self._top >= 0, "Stack underflow"
-        value = self._data[self._top]
-        self._data[self._top] = None
-        self._top -= 1
-        return value
+        if self.topNode is None:
+            return None
+        pop_value = self.topNode.data
+        self.topNode = self.topNode.next
+        self.count -= 1
+        return pop_value
 
     def peek(self):
-        assert self._top >= 0, "Stack is empty"
-        return self._data[self._top]
+        if self.topNode is None:
+            return None
+        return self.topNode.data
 
     def is_empty(self):
-        return self._top == -1
+        return self.topNode is None
 
     def size(self):
-        return self._top + 1
+        return self.count
 
 class MyQueue:
     def __init__(self):
-        capacity = 100
-        self.inStack = Stack(capacity)
-        self.outStack = Stack(capacity)
+        self.inStack = Stack()
+        self.outStack = Stack()
 
     def push(self, value: int) -> None:
         self.inStack.push(value)
